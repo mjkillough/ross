@@ -3,6 +3,7 @@
 #include "io.h"
 #include "gpio.h"
 #include "uart.h"
+#include "interrupts.h"
 
 
 void flash_act_led(void)
@@ -30,5 +31,18 @@ void kernel_main(void)
 
     kprintf("Ross says Hello!\n");
     kprintf("%%p = %p\n", 0xDEADB33F);
-    flash_act_led();
+
+    // Enable UARTINT, GPU IRQ 57
+    mmio_write(INT_ENABLE_GPU2, 1 << 25);
+
+    while (1) {
+        for (uint32_t i = 0x3F0000; i > 0; i--) ;
+
+        kprintf("UART0_IMSC = %p\n", mmio_read(UART0_IMSC));
+        kprintf("UART0_RIS = %p\n", mmio_read(UART0_RIS));
+        kprintf("UART0_MIS = %p\n", mmio_read(UART0_MIS));
+        kprintf("INT_PENDING_BASIC = %p\n", mmio_read(INT_PENDING_BASIC));
+        kprintf("INT_PENDING_GPU1 = %p\n", mmio_read(INT_PENDING_GPU1));
+        kprintf("INT_PENDING_GPU2 = %p\n", mmio_read(INT_PENDING_GPU2));
+    }
 }
