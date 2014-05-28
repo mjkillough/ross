@@ -35,6 +35,10 @@ void kernel_main(void)
     // Enable UARTINT, GPU IRQ 57
     mmio_write(INT_ENABLE_GPU2, 1 << 25);
 
+    for (uint32_t i = 0; i < 2*8*4; i += 4) {
+        kprintf("%p = %p\n", i, mmio_read(i));
+    }
+
     while (1) {
         for (uint32_t i = 0x3F0000; i > 0; i--) ;
 
