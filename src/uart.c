@@ -1,4 +1,4 @@
-// UART I/O
+// UART0 I/O
 // Originally taken from http://wiki.osdev.org/ARM_RaspberryPi_Tutorial_C
 
 #include <stdint.h>
@@ -20,15 +20,16 @@ void delay(uint32_t cycles)
 
 void uart_init(void)
 {
+    // Set GPIO 14/15 to Alt Func 0 (for UART0)
+    gpio_function_select(14, 0x4);
+    gpio_function_select(15, 0x4);
+
     // Disable PUD for GPIO 14/15 (see 6.1 of BCM2835)
     mmio_write(GPPUD, 0);
     delay(150);
     mmio_write(GPPUDCLK0, (1 << 14) | (1 << 15));
     delay(150);
     mmio_write(GPPUD, 0);
-
-    // Clear interrupts
-    mmio_write(UART0_ICR, 0x7FF);
 
     // Set integer & fractional part of baud rate.
     // Divider = UART_CLOCK/(16 * Baud)
@@ -42,10 +43,15 @@ void uart_init(void)
     // Enable FIFO & 8 bit data transmissio (1 stop bit, no parity).
     mmio_write(UART0_LCRH, (1 << 4) | (1 << 5) | (1 << 6));
 
-    // Mask all interrupts.
-    mmio_write(UART0_IMSC, (1 << 1) | (1 << 4) | (1 << 5) |
-                           (1 << 6) | (1 << 7) | (1 << 8) |
-                           (1 << 9) | (1 << 10));
+    // Configure UARTTXINTR/UARTRXINTR levels
+    mmio_write(UART0_IFLS, 0);
+
+    // Disable and clear all interrupts
+    mmio_write(UART0_ICR, 0x7FF);
+    mmio_write(UART0_IMSC, (0 << 1) | (0 << 4) | (0 << 5) |
+                           (0 << 6) | (0 << 7) | (0 << 8) |
+                           (0 << 9) | (0 << 10));
+    mmio_write(UART0_ICR, 0x7FF);
 
     // Enable UART0, receive & transfer part of UART.
     mmio_write(UART0_CR, (1 << 0) | (1 << 8) | (1 << 9));

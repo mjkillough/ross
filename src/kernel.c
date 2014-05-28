@@ -26,6 +26,8 @@ void flash_act_led(void)
 
 void kernel_main(void)
 {
+    uart_init();
+
     kprintf("Ross says Hello!\n");
     kprintf("%%p = %p\n", 0xDEADB33F);
     flash_act_led();
