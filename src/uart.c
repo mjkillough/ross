@@ -46,9 +46,9 @@ void uart_init(void)
     // Configure UARTTXINTR/UARTRXINTR levels
     mmio_write(UART0_IFLS, 0);
 
-    // Disable and clear all interrupts
+    // Disable and clear all interrupts, except UARTRXINTR (receive)
     mmio_write(UART0_ICR, 0x7FF);
-    mmio_write(UART0_IMSC, (0 << 1) | (0 << 4) | (0 << 5) |
+    mmio_write(UART0_IMSC, (0 << 1) | (1 << 4) | (0 << 5) |
                            (0 << 6) | (0 << 7) | (0 << 8) |
                            (0 << 9) | (0 << 10));
     mmio_write(UART0_ICR, 0x7FF);
