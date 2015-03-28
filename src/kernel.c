@@ -4,6 +4,7 @@
 #include "gpio.h"
 #include "uart.h"
 #include "interrupts.h"
+#include "mmu.h"
 
 
 void sleep()
@@ -46,9 +47,8 @@ void kernel_main(void)
         kprintf("%p = %p\n", i, mmio_read(i));
     }
 
-    int i = 0;
-    while (1) {
-        kprintf("%p\n", i++);
-        sleep();
-    }
+    page_table_t l1_page_table = init_mmu();
+
+    while(1)
+        0;
 }
