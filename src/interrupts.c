@@ -43,7 +43,7 @@ void __attribute__ ((interrupt)) interrupts_isr_unused(void)
 }
 
 
-void __attribute__ ((interrupt ("FIQ"))) interrupts_isr_irq(void)
+void __attribute__ ((interrupt ("IRQ"))) interrupts_isr_irq(void)
 {
     uint8_t c;
     // UARTINT?
@@ -56,7 +56,7 @@ void __attribute__ ((interrupt ("FIQ"))) interrupts_isr_irq(void)
 }
 
 
-void __attribute__ ((interrupt ("IRQ"))) interrupts_isr_fiq(void)
+void __attribute__ ((interrupt ("FIQ"))) interrupts_isr_fiq(void)
 {
     kprintf("interrupts_isr_fiq\n");
 }
