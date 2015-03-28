@@ -34,11 +34,29 @@ _start:
     mov r0, #0x53
     msr cpsr_c, r0
 
+    bl zero_bss
+
     bl kernel_main
+
+
+zero_bss:
+    ldr r0, =__bss_start
+    ldr r1, =__bss_end
+    mov r2, #0
+    mov r3, #0
+    mov r4, #0
+    mov r5, #0
+_zero_bss_loop:
+    stmia r0!, {r2, r3, r4, r5}
+    cmp r0, r1
+    blo _zero_bss_loop
+    mov pc, lr
+
 
 halt:
     wfe
     b halt
+
 
 install_interrupt_vector:
     ldr r0, =interrupt_vector
