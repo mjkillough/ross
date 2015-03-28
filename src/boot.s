@@ -14,6 +14,12 @@ _start:
     msr cpsr_c, r0
     mov sp, #0x6000
 
+    @ SP for ABT mode
+    @ 0xD1 = (PSR_ABT_MODE|PSR_FIQ_DIS|PSR_IRQ_DIS)
+    mov r0, #0xD7
+    msr cpsr_c, r0
+    mov sp, #0x7000
+
     @ SP for SVC mode
     @ 0xD3 = (PSR_SVC_MODE|PSR_FIQ_DIS|PSR_IRQ_DIS)
     mov r0, #0xD3
