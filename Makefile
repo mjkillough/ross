@@ -1,5 +1,5 @@
 ARMGNU ?= arm-none-eabi
-CFLAGS = -std=gnu99 -nostdlib -fpic -fno-builtin
+CFLAGS = -std=gnu99 -nostdlib -fpic -fno-builtin -g
 
 BUILD = build/
 SOURCE = src/
