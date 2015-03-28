@@ -6,13 +6,20 @@
 #include "interrupts.h"
 
 
+void sleep()
+{
+    for (uint32_t i = 0x3F0000; i > 0; )
+        // Doing this as part of the loop body makes gdb happier when stepping.
+        i--;
+}
+
+
 void flash_act_led(void)
 {
     gpio_function_select(16, 1);
     char flip = 1;
     while (1) {
-        // poor man's sleep
-        for (uint32_t i = 0x3F0000; i > 0; i--) ;
+        sleep();
 
         if (flip) {
             gpio_turn_off(16);
@@ -39,14 +46,9 @@ void kernel_main(void)
         kprintf("%p = %p\n", i, mmio_read(i));
     }
 
+    int i = 0;
     while (1) {
-        for (uint32_t i = 0x3F0000; i > 0; i--) ;
-
-        kprintf("UART0_IMSC = %p\n", mmio_read(UART0_IMSC));
-        kprintf("UART0_RIS = %p\n", mmio_read(UART0_RIS));
-        kprintf("UART0_MIS = %p\n", mmio_read(UART0_MIS));
-        kprintf("INT_PENDING_BASIC = %p\n", mmio_read(INT_PENDING_BASIC));
-        kprintf("INT_PENDING_GPU1 = %p\n", mmio_read(INT_PENDING_GPU1));
-        kprintf("INT_PENDING_GPU2 = %p\n", mmio_read(INT_PENDING_GPU2));
+        kprintf("%p\n", i++);
+        sleep();
     }
 }
