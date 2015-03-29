@@ -48,7 +48,7 @@ void kernel_main(void)
         kprintf("%p = %p\n", i, mmio_read(i));
     }
 
-    page_table_t l1_page_table = init_mmu();
+    //page_table_t l1_page_table = init_mmu();
 
     timer_init();
     timer_set_value(0xFFFF);

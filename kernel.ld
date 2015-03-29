@@ -1,49 +1,49 @@
-/******************************************************************************
-*   kernel.ld
-*    by Alex Chadwick
-*
-*   A linker script for generation of raspberry pi kernel images, with C
-*   code.
-******************************************************************************/
-
 SECTIONS {
-    /*
-     * First and formost we need the .init section, containing the code to
-     * be run first. We allow room for the ATAGs and stack and conform to
-     * the bootloader's expectation by putting this code at 0x8000.
+    /* boot.s goes first. At the very start of this (at 0x8000) there is .init,
+     * which is our entry point. We make sure that all of boot.s' sections go
+     * next, as these must all be located in the lower section of memory - the
+     * rest of the kernel is located high in memory and can only be accessed
+     * once we've enabled the MMU.
      */
     .init 0x8000 : {
         *(.init)
     }
+    .data.boot : {
+        */boot.o(.data)
+    }
+    .text.boot : {
+        */boot.o(.text)
+    }
+    .rodata.boot : {
+        */boot.o(.rodata)
+    }
+    _boot_end = .;
 
-    /*
-    * Next we put the data.
-    */
-    .data : {
+    /* The rest of the kernel is going to be placed high in virtual memory and
+     * can only be accessed after we've enabled paging and mapped it.
+     */
+    . = 0xc0000000;
+    _kernel_start = .;
+    .data 0xc0000000 + _boot_end : AT (_boot_end) {
         *(.data)
         *.c.o(*)
     }
-
-    /*
-     * Next we put the rest of the code.
-     */
     .text : {
         *.c.o(.text)
         *(.text)
     }
-
     .rodata : {
         *(.rodata)
     }
 
-    __bss_start = .;
-    .bss :
-    {
-        bss = .;
+    /* We remember the location of the BSS region, so that boot.s can zero it
+     * after it's enabled the MMU but before it calls into kernel_main().
+     */
+    .bss : ALIGN(4096) {
+        _bss_start = .;
         *(.bss)
+        _bss_end = .;
     }
-    . = ALIGN(4096); /* align to page size */
-    __bss_end = .;
 
     /* Then everything else, including debug symbols. */
 }
