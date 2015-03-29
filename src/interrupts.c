@@ -2,6 +2,7 @@
 #include "io.h"
 #include "mmio.h"
 #include "uart.h"
+#include "timer.h"
 
 
 void __attribute__ ((interrupt)) interrupts_isr_reset(void)
@@ -45,14 +46,22 @@ void __attribute__ ((interrupt)) interrupts_isr_unused(void)
 
 void __attribute__ ((interrupt ("IRQ"))) interrupts_isr_irq(void)
 {
-    uint8_t c;
+    // Timer?
+    if (timer_interrupt_pending()) {
+        timer_interrupt_clear();
+        kprintf("interrupts_isr_irq: timer\n");
+        return;
+    }
+
     // UARTINT?
     if (mmio_read(INT_PENDING_GPU2) & (1 << 25)) {
+        uint8_t c;
         if (mmio_read(UART0_MIS) & (1 << 4)) {
             c = uart_getc(); // read to clear the interrupt
         }
+        kprintf("interrupts_isr_irq: uart received %p\n", (uint32_t)c);
+        return;
     }
-    kprintf("interrupts_isr_irq: received %p\n", (uint32_t)c);
 }
 
 

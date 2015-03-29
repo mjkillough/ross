@@ -5,6 +5,7 @@
 #include "uart.h"
 #include "interrupts.h"
 #include "mmu.h"
+#include "timer.h"
 
 
 void sleep()
@@ -49,6 +50,13 @@ void kernel_main(void)
 
     page_table_t l1_page_table = init_mmu();
 
-    while(1)
-        0;
+    timer_init();
+    timer_set_value(0xFFFF);
+    timer_enable_interrupt();
+    timer_enable();
+
+    while(1) {
+        sleep(); sleep(); sleep();
+        kprintf("timer = %p\n", (uint32_t)timer_get_value());
+    }
 }
