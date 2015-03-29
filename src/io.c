@@ -49,6 +49,7 @@ void kprintf(const char *str, ...)
                         out[i] = hex[ptr & 0xF];
                         ptr >>= 4;
                     }
+                    out[8] = '\0';
                     puts(out);
                     break;
                 }
