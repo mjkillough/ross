@@ -12,7 +12,7 @@
 static void* _free_base = (void*)0x400001;
 void* _kmalloc(size_t size, uint8_t aligned)
 {
-    if (aligned && ((uint32_t)_free_base & 0x2FFF) != 0) {
+    if (aligned && ((uint32_t)_free_base & 0x3FFF) != 0) {
         _free_base = (void*)(((uint32_t)_free_base + 0x4000) & 0xFFFFC000);
     }
     void* ret = _free_base;
