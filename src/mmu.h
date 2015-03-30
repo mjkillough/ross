@@ -33,7 +33,10 @@ page_table_t create_identity_page_table();
 void set_level1_page_table(page_table_t page_table);
 void set_mmu_state(uint8_t enabled);
 
-page_table_t init_mmu();
+void unmap_section(page_table_t page_table, uint32_t section_addr);
+void map_section(page_table_t page_table, uint32_t section_addr, uint32_t physical_addr);
+
+page_table_t mmu_init();
 
 
 #endif // __MMU_H__

@@ -51,20 +51,45 @@ inline void set_mmu_state(uint8_t enabled)
 }
 
 
-page_table_t init_mmu()
+void map_section(page_table_t page_table, uint32_t section_addr, uint32_t physical_addr)
 {
-    // Switch to using a single L1 PT with identity mapping.
-    page_table_t page_table = create_identity_page_table();
-    set_level1_page_table(page_table);
+    uint32_t table_index = section_addr >> 20;
+    page_table_entry_l1_t* _entries = (page_table_entry_l1_t*)page_table;
+    _entries[table_index] = (physical_addr & 0xFFF00000) |
+                            PTE_L1_SECTION_AP(2) | // always r/w for now
+                            PTE_L1_TYPE_SECTION;
+}
 
-    // Set Domain 0 to "Manager"
-    asm volatile (
-        "mcr p15, 0, %0, c3, c0, 0"
-        : : "r" (0x3) :
-    );
 
-    // Enable the MMU
-    set_mmu_state(1);
+void unmap_section(page_table_t page_table, uint32_t section_addr)
+{
+    uint32_t table_index = section_addr >> 20;
+    page_table_entry_l1_t* _entries = (page_table_entry_l1_t*)page_table;
+    _entries[table_index] = 0;
+}
+
+
+page_table_t mmu_init()
+{
+    // boot.s creates a page table at 0xC000, which gets mirrored at 0xC000C000
+    page_table_t page_table = (page_table_t) 0xC000C000;
+
+    // The page table created by boot.s identity maps upto 0xC0000000 and then
+    // maps 0xC0000000+ onto 0x0+. We don't need the identity map now that we
+    // have branched into higher memory (kernel_main) so we can unmap it.
+    const uint32_t section_size = 0x00100000;
+    for (uint32_t addr = 0; addr < 0xC0000000; addr += section_size) {
+        unmap_section(page_table, addr);
+    }
+
+    // TODO: Unmap the unused bits above 0xC0000000
+
+    // The BCM2835 puts the I/O peripherals at 0x20000000. Map these to
+    // 0x7Ennnnnn. Conveniently, these are the addresses that the BCM2835 doc
+    // uses to refer to them.
+    for (uint32_t addr = 0x7E000000; addr < 0x7F000000; addr += section_size) {
+        map_section(page_table, addr, 0x20000000 | (addr & 0x00FFFFFF));
+    }
 
     // Return out L1 PT, as we can modify it later.
     return page_table;

@@ -7,7 +7,7 @@
 
 
 enum {
-    UART0_BASE   = 0x20201000,
+    UART0_BASE   = 0x7E201000,
 
     UART0_DR     = (UART0_BASE + 0x00),
     UART0_RSRECR = (UART0_BASE + 0x04),

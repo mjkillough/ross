@@ -36,19 +36,13 @@ void flash_act_led(void)
 
 void kernel_main(void)
 {
+    page_table_t page_table = mmu_init();
     uart_init();
 
     kprintf("Ross says Hello!\n");
-    kprintf("%%p = %p\n", 0xDEADB33F);
 
     // Enable UARTINT, GPU IRQ 57
     mmio_write(INT_ENABLE_GPU2, 1 << 25);
-
-    for (uint32_t i = 0; i < 2*8*4; i += 4) {
-        kprintf("%p = %p\n", i, mmio_read(i));
-    }
-
-    //page_table_t l1_page_table = init_mmu();
 
     timer_init();
     timer_set_value(0xFFFF);
@@ -57,6 +51,5 @@ void kernel_main(void)
 
     while(1) {
         sleep(); sleep(); sleep();
-        kprintf("timer = %p\n", (uint32_t)timer_get_value());
     }
 }

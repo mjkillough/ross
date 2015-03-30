@@ -9,7 +9,7 @@
 
 
 enum {
-    GPIO_BASE = 0x20200000,
+    GPIO_BASE = 0x7E200000,
 
     GPFSEL0   = (GPIO_BASE + 0x00),
     GPFSEL1   = (GPIO_BASE + 0x04),
