@@ -25,15 +25,59 @@ void __attribute__ ((interrupt ("SWI"))) interrupts_isr_swi(void)
 }
 
 
-void __attribute__ ((interrupt ("ABORT"))) interrupts_isr_prefetch_abort(void)
+// We use a custom wrapper (below) for the _prefetch_abort so that we have
+// can return to the same instruction (or HALT). GCC's abort wrapper returns to
+// the *next* instruction, which is rarely what we want.
+void _interrupts_isr_prefetch_abort(uint32_t faulting_addr)
 {
-    kprintf("interrupts_isr_prefetch_abort\n");
+    uint32_t fault_status = 0;
+    asm volatile ("mrc p15, 0, %0, c5, c0, 1" : "=r" (fault_status));
+
+    kprintf("interrupts_isr_prefetch_abort: fault_status=%p faulting_addr=%p\n",
+        fault_status, faulting_addr
+    );
+
+    // PANIC
+    kprintf("panic\n");
+    while (1)
+        0;
+}
+void __attribute__((naked)) interrupts_isr_prefetch_abort(void)
+{
+    asm volatile ("sub lr, lr, #4");
+    asm volatile ("stmfd sp!, {r0-r12, lr}");
+    uint32_t faulting_addr;
+    asm volatile ("mov %0, lr" : "=r" (faulting_addr));
+    _interrupts_isr_prefetch_abort(faulting_addr);
+    asm volatile ("ldmfd sp!, {r0-r12, pc}^");
 }
 
-
-void __attribute__ ((interrupt ("ABORT"))) interrupts_isr_data_abort(void)
+// We use a customer wrapper for _data_abort() for the same reasons as
+// _prefetch_abort().
+void _interrupts_isr_data_abort(uint32_t faulting_addr)
 {
-    kprintf("interrupts_isr_data_abort\n");
+    uint32_t fault_status = 0;
+    asm volatile ("mrc p15, 0, %0, c5, c0, 0" : "=r" (fault_status));
+    uint32_t fault_addr = 0;
+    asm volatile ("mrc p15, 0, %0, c6, c0, 0" : "=r" (fault_addr));
+
+    kprintf("interrupts_isr_data_abort: fault_status=%p faulting_addr=%p fault_addr=%p\n",
+        fault_status, faulting_addr, fault_addr
+    );
+
+    // PANIC
+    kprintf("panic\n");
+    while (1)
+        0;
+}
+void __attribute__((naked)) interrupts_isr_data_abort(void)
+{
+    asm volatile ("sub lr, lr, #8");
+    asm volatile ("stmfd sp!, {r0-r12, lr}");
+    uint32_t faulting_addr;
+    asm volatile ("mov %0, lr" : "=r" (faulting_addr));
+    _interrupts_isr_data_abort(faulting_addr);
+    asm volatile ("ldmfd sp!, {r0-r12, pc}^");
 }
 
 
