@@ -77,8 +77,9 @@ page_table_t mmu_init()
     // The page table created by boot.s identity maps upto 0xC0000000 and then
     // maps 0xC0000000+ onto 0x0+. We don't need the identity map now that we
     // have branched into higher memory (kernel_main) so we can unmap it.
+    // XXX for now, we *do* need the first page for our interrupt vector...
     const uint32_t section_size = 0x00100000;
-    for (uint32_t addr = 0; addr < 0xC0000000; addr += section_size) {
+    for (uint32_t addr = section_size; addr < 0xC0000000; addr += section_size) {
         unmap_section(page_table, addr);
     }
 
