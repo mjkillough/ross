@@ -104,31 +104,21 @@ _zero_bss_loop:
     mov pc, lr
 
 
+;@ The ARM1176JZF-S has Secure Extensions, which means that we can specify a
+;@ an interrupt vector, rather than placing it at 0x0 or the high vector addr.
+;@ The address of the vector must be 32 byte aligned.
+;@ See the TRM section 3.2.43
 install_interrupt_vector:
     ldr r0, =interrupt_vector
-    mov r1, #0x0000
-    ldmia r0!, {r2, r3, r4, r5, r6, r7, r8, r9}
-    stmia r1!, {r2, r3, r4, r5, r6, r7, r8, r9}
-    ldmia r0!, {r2, r3, r4, r5, r6, r7, r8, r9}
-    stmia r1!, {r2, r3, r4, r5, r6, r7, r8, r9}
+    MCR p15, 0, r0, c12, c0, 0
     mov pc, lr
+.p2align 5
 interrupt_vector:
-    ldr pc, _addr_interrupts_isr_reset
-    ldr pc, _addr_interrupts_isr_undefined
-    ldr pc, _addr_interrupts_isr_swi
-    ldr pc, _addr_interrupts_isr_prefetch_abort
-    ldr pc, _addr_interrupts_isr_data_abort
-    ldr pc, _addr_interrupts_isr_unused
-    ldr pc, _addr_interrupts_isr_irq
-    ldr pc, _addr_interrupts_isr_fiq
-;@ Yuck. We need these stubs, so that the addr of the LDRs immediately follow
-;@ the LDRs in the code. (We need this as we relocate the interrupt_vector to
-;@ 0x00000000 at runtime).
-_addr_interrupts_isr_reset:          .word interrupts_isr_reset
-_addr_interrupts_isr_undefined:      .word interrupts_isr_undefined
-_addr_interrupts_isr_swi:            .word interrupts_isr_swi
-_addr_interrupts_isr_prefetch_abort: .word interrupts_isr_prefetch_abort
-_addr_interrupts_isr_data_abort:     .word interrupts_isr_data_abort
-_addr_interrupts_isr_unused:         .word interrupts_isr_unused
-_addr_interrupts_isr_irq:            .word interrupts_isr_irq
-_addr_interrupts_isr_fiq:            .word interrupts_isr_fiq
+    ldr pc, =interrupts_isr_reset
+    ldr pc, =interrupts_isr_undefined
+    ldr pc, =interrupts_isr_swi
+    ldr pc, =interrupts_isr_prefetch_abort
+    ldr pc, =interrupts_isr_data_abort
+    ldr pc, =interrupts_isr_unused
+    ldr pc, =interrupts_isr_irq
+    ldr pc, =interrupts_isr_fiq
