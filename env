@@ -3,4 +3,4 @@
 # Raspberry Pi QEMU in a specific location and the arm toolchain as a sub-dir
 # of this repo.
 
-export PATH=$PATH:`pwd`/gcc-arm-none-eabi-4_8-2014q1/bin:`pwd`/../qemu/build/arm-softmmu/
+export PATH=$PATH:`pwd`/gcc-arm-none-eabi-4_8-2014q1/bin:`pwd`/../qemu/arm-softmmu/
