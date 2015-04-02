@@ -3,7 +3,7 @@
 
 
 enum {
-    INT_BASE = 0x2000B000,
+    INT_BASE = 0x7E00B000,
 
     INT_PENDING_BASIC = (INT_BASE + 0x200),
     INT_PENDING_GPU1  = (INT_BASE + 0x204),
