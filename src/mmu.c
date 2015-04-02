@@ -85,8 +85,11 @@ page_table_t mmu_init()
     for (uint32_t addr = 0x0; addr < 0xC0000000; addr += section_size) {
         unmap_section(page_table, addr);
     }
-
-    // TODO: Explicitly unmap the unused bits above 0xC0000000
+    // Explicitly unmap anything but the first 1MB of memory above 0xC0000000
+    // (which is where our kernel lives).
+    for (uint32_t addr = 0xC1000000; addr < 0xFF000000; addr += section_size) {
+        unmap_section(page_table, addr);
+    }
 
     // The BCM2835 puts the I/O peripherals at 0x20000000. Map these to
     // 0x7Ennnnnn. Conveniently, these are the addresses that the BCM2835 doc
