@@ -1,8 +1,8 @@
 .section .init
 .globl _start
 _start:
-    # Set up a temporary stack in low-memory. We'll switch to a more permanent
-    # stack before calling the kernel.
+    ;@ Set up a temporary stack in low-memory. We'll switch to a more permanent
+    ;@ stack before calling the kernel.
     mov sp, #0x8000
 
     bl map_kernel_to_higher_memory
@@ -40,41 +40,29 @@ _start:
 
 map_kernel_to_higher_memory:
     push {lr}
-    # Creates a 16KB page table at 0xC000 (the next 16KB aligned address)
-    # The page table identity maps upto 0xC0000000 and mirrors 0x00000000 to
-    # 0x40000000 above 0xC0000000.
-    ldr r0, =0xC000
-    # Identity map upto 0xC0000000
-    mov r1, #0x0    ;@ Loop index
-    ldr r2, =0x3000 ;@ 0x3000 entries (3/4 of memory)
-    ldr r3, =0xC02  ;@ Our flags for each of our page table entries.
-    bl _fill_page_table
-    # Map above 0xC0000000 to the bottom of memory
-    ldr r0, =0xF000 ;@ Base addr in page table (3/4 through - 0xC000+0x3000)
-    mov r1, #0x0    ;@ Reset loop index
-    ldr r2, =0x1000 ;@ 0x1000 entries (last 1/4 of memory)
-    bl _fill_page_table
+    ;@ Creates a 16KB page table at 0xC000 (the next 16KB aligned address).
+    ;@ The page table maps the physical 1MB section at 0x0 to 0x0 and 0xC0000000
+    ;@ in the virtual address space. (We'll continue to execute at 0x0 and then
+    ;@ jump to ~0xC0000000 when we branch to kernel_main(). mmu_init() will
+    ;@ setup up a proper page table later).
+    ldr r0, =0xC000  ;@ Base of the page table
+    ldr r1, =0x3000  ;@ Index for page table entry of 0xC0000000
+    ldr r2, =0xC02   ;@ Section page table entry with AP(3) flags and domain 0
+    str r2, [r0]     ;@ Map 0x0
+    str r2, [r0, r1] ;@ Map 0xC0000000
 
-    # Set TTBR0 to point to the page table
+    ;@ Set TTBR0 to point to the page table
     ldr r0, =0xC000
     mcr p15, 0, r0, c2, c0, 0
-    # Set Domain 0 to 'Manager'
+    ;@ Set Domain 0 to 'Manager'
     mov r0, #0x3
     mcr p15, 0, r0, c3, c0, 0
-    # Turn on the MMU
+    ;@ Turn on the MMU
     mrc p15, 0, r0, c1, c0, 0
     orr r0, r0, #0x1
     mcr p15, 0, r0, c1, c0, 0
 
     pop {pc}
-_fill_page_table:
-    lsl r5, r1, #20 ;@ Move index to base_addr location in PTE
-    orr r5, r5, r3  ;@ Apply the flags to PTE
-    str r5, [r0, r1, LSL #2] ;@ Store the PTE in the PT
-    add r1, r1, #1
-    cmp r1, r2
-    blo _fill_page_table
-    mov pc, lr
 
 
 zero_bss:

@@ -72,17 +72,21 @@ void unmap_section(page_table_t page_table, uint32_t section_addr)
 page_table_t mmu_init()
 {
     // boot.s creates a page table at 0xC000, which gets mirrored at 0xC000C000
+    // it doesn't bother initializing the page table. It maps the section at
+    // 0x0 and 0xC0000000 to point to the first 1MB of physical memory but
+    // nothing else.
     page_table_t page_table = (page_table_t) 0xC000C000;
 
-    // The page table created by boot.s identity maps upto 0xC0000000 and then
-    // maps 0xC0000000+ onto 0x0+. We don't need the identity map now that we
-    // have branched into higher memory (kernel_main) so we can unmap it.
+    // Unmap anything below 0xC0000000. We don't need the identity mapping on
+    // the first 1MB of memory anymore (as we've branched to higher memory).
+    // It also doesn't hurt to ensure that all other sections below 0xC0000000
+    // are explicitly unmapped.
     const uint32_t section_size = 0x00100000;
     for (uint32_t addr = 0x0; addr < 0xC0000000; addr += section_size) {
         unmap_section(page_table, addr);
     }
 
-    // TODO: Unmap the unused bits above 0xC0000000
+    // TODO: Explicitly unmap the unused bits above 0xC0000000
 
     // The BCM2835 puts the I/O peripherals at 0x20000000. Map these to
     // 0x7Ennnnnn. Conveniently, these are the addresses that the BCM2835 doc
