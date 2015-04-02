@@ -68,6 +68,8 @@ map_kernel_to_higher_memory:
 zero_bss:
     ldr r0, =_bss_start
     ldr r1, =_bss_end
+    cmp r0, r1
+    beq _zero_bss_end
     mov r2, #0
     mov r3, #0
     mov r4, #0
@@ -76,6 +78,7 @@ _zero_bss_loop:
     stmia r0!, {r2, r3, r4, r5}
     cmp r0, r1
     blo _zero_bss_loop
+_zero_bss_end:
     mov pc, lr
 
 
