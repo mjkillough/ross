@@ -41,8 +41,15 @@ void kernel_main(void)
 
     kprintf("Ross says Hello!\n");
 
+    // Mask all BCM2835 interrupts
+    mmio_write(INT_DISABLE_GPU1, 0xFF);
+    mmio_write(INT_DISABLE_GPU2, 0xFF);
+    mmio_write(INT_DISABLE_BASIC, 0xFF);
     // Enable UARTINT, GPU IRQ 57
     mmio_write(INT_ENABLE_GPU2, 1 << 25);
+
+    // Enable IRQ/FIQ on ARM
+    interrupts_enable();
 
     timer_init();
     timer_set_value(0xFFFF);

@@ -5,6 +5,16 @@
 #include "timer.h"
 
 
+void interrupts_enable(void)
+{
+    uint32_t cpsr_c;
+    asm("mrs %0, cpsr" : "=r" (cpsr_c));
+    // Clear the A (imprecise data aborts), I (IRQ), F(IRQ) bits - [8:6]
+    cpsr_c &= 0xE3F;
+    asm("msr cpsr_c, %0" : : "r" (cpsr_c));
+}
+
+
 void __attribute__ ((interrupt)) interrupts_isr_reset(void)
 {
     // We should never actually see this. When the RPi ARM is RESET, the rest

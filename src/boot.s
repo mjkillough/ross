@@ -33,19 +33,6 @@ _start:
 
     bl install_interrupt_vector
 
-    @ Mask all BCM2835 specific interrupts
-    mov r1, #0xFF
-    ldr r0, =0x2000B000
-    str r1, [r0, #0x21C] ;@ INT_DISABLE_GPU1
-    str r1, [r0, #0x220] ;@ INT_DISABLE_GPU2
-    str r1, [r0, #0x224] ;@ INT_DISABLE_BASIC
-
-    @ Enable IRQ
-    @ 0x53 = (PSR_SVC_MODE|PSR_FIQ_DIS|PSR_IRQ_EN)
-    @ TODO: Move this to kernel_main/C
-    mov r0, #0x53
-    msr cpsr_c, r0
-
     bl zero_bss
 
     bl kernel_main
