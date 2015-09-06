@@ -84,19 +84,11 @@ _zero_bss_end:
 
 ;@ The ARM1176JZF-S has Secure Extensions, which means that we can specify a
 ;@ an interrupt vector, rather than placing it at 0x0 or the high vector addr.
-;@ The address of the vector must be 32 byte aligned.
+;@ Our interrupt vector is defined in vector.s. It is linked to be 32 byte
+;@ aligned. It resides in high mem.
 ;@ See the TRM section 3.2.43
 install_interrupt_vector:
     ldr r0, =interrupt_vector
     MCR p15, 0, r0, c12, c0, 0
     mov pc, lr
 .p2align 5
-interrupt_vector:
-    ldr pc, =interrupts_isr_reset
-    ldr pc, =interrupts_isr_undefined
-    ldr pc, =interrupts_isr_swi
-    ldr pc, =interrupts_isr_prefetch_abort
-    ldr pc, =interrupts_isr_data_abort
-    ldr pc, =interrupts_isr_unused
-    ldr pc, =interrupts_isr_irq
-    ldr pc, =interrupts_isr_fiq
