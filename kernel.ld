@@ -26,10 +26,8 @@ SECTIONS {
     _kernel_start = .;
     .data 0xc0000000 + _boot_end : AT (_boot_end) {
         *(.data)
-        *.c.o(*)
     }
     .text : {
-        *.c.o(.text)
         *(.text)
     }
     .rodata : {
