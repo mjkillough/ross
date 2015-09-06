@@ -5,7 +5,7 @@
 # * We pass both `-kernel` and `-initrd` as this causes QEMU to start at 0x8000,
 #   rather than 0x1000.
 # * We pass a bunch of nograph/stdio/console stuff as it makes it easier to
-#   quit QEMU using the monitor (Cntrl + A, C, q, enter).
+#   quit QEMU using the monitor (Ctrl + A, C, q, enter).
 
 qemu-system-arm -kernel kernel.img -initrd kernel.img \
                 -cpu arm1176 -m 256 -M raspi \
