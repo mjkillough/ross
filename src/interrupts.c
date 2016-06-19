@@ -3,6 +3,7 @@
 #include "mmio.h"
 #include "uart.h"
 #include "timer.h"
+#include "panic.h"
 
 
 void interrupts_enable(void)
@@ -47,10 +48,7 @@ void _interrupts_isr_prefetch_abort(uint32_t faulting_addr)
         fault_status, faulting_addr
     );
 
-    // PANIC
-    kprintf("panic\n");
-    while (1)
-        0;
+    panic("unhandled prefetch abort");
 }
 void __attribute__((naked)) interrupts_isr_prefetch_abort(void)
 {
@@ -75,10 +73,8 @@ void _interrupts_isr_data_abort(uint32_t faulting_addr)
         fault_status, faulting_addr, fault_addr
     );
 
-    // PANIC
-    kprintf("panic\n");
-    while (1)
-        0;
+
+    panic("unhandled data abort");
 }
 void __attribute__((naked)) interrupts_isr_data_abort(void)
 {
